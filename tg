@@ -1,0 +1,51 @@
+import logging
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+# Set up logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+# Initialize Telegram bot token
+TOKEN = "YOUR_BOT_TOKEN"  # Replace with your bot token
+
+# Create a list to store favorite channels' messages
+favorite_messages = []
+
+# Define a callback function to handle /start command
+def start(update, context):
+    """Callback function to handle /start command."""
+    update.message.reply_text('Welcome to your favorite channel message accumulator bot! Send me messages from your favorite channels.')
+
+# Define a callback function to handle messages
+def accumulate_messages(update, context):
+    """Callback function to accumulate messages from favorite channels."""
+    message = update.message
+    favorite_messages.append(message)  # Add the message to the list of favorite messages
+
+# Define a callback function to handle /get_messages command
+def get_messages(update, context):
+    """Callback function to retrieve accumulated messages from favorite channels."""
+    update.message.reply_text('Here are your accumulated messages:')
+    for message in favorite_messages:
+        # Send the accumulated messages back to the user
+        update.message.reply_text(message.text)
+
+# Set up the Telegram bot
+def main():
+    """Main function to set up and start the Telegram bot."""
+    updater = Updater(TOKEN, use_context=True)
+    dp = updater.dispatcher
+
+    # Add command handlers
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("get_messages", get_messages))
+
+    # Add message handler
+    dp.add_handler(MessageHandler(Filters.text, accumulate_messages))
+
+    # Start the bot
+    updater.start_polling()
+    logging.info("Bot started!")
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
